@@ -1,2 +1,2 @@
-<HyperLink MouseEnter="HyperLinkMouseEnter" MouseExit="HyperLinkMouseExit" MouseDown="HyperLinkMouseDown" MouseUp="HyperLinkMouseUp">
+<HyperLink MouseEnter="HyperLinkMouseEnter" MouseExit="HyperLinkMouseExit" MouseDown="HyperLinkMouseDown" MouseUp="HyperLinkMouseUp" IsFocusable="True">
 </HyperLink>

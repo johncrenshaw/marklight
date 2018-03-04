@@ -3,16 +3,16 @@
   <Label Style="ShowcaseHeader" Font="Fonts/Roboto-Regular.ttf" FontSize="26" FontColor="#ffffff" />
   <Label Style="ShowcaseDescription" Font="Fonts/Roboto-Light.ttf" FontSize="18" FontColor="#ffffff" />
 
-  <Button BackgroundColor="#7d7d7d" FontColor="#ffffff" FontStyle="Normal" Highlighted-BackgroundColor="Gray90" Pressed-BackgroundColor="#ef706a"
-          Highlighted-FontColor="#000000" Pressed-FontColor="#ffffff" Height="50px"
+  <Button BackgroundColor="#7d7d7d" FontColor="#ffffff" FontStyle="Normal" Focused-BackgroundColor="Gray90" FocusedPressed-BackgroundColor="#dddddd" Highlighted-BackgroundColor="Gray90" Pressed-BackgroundColor="#ef706a"
+          Focused-FontColor="#000000" FocusedPressed-FontColor="#000000" Highlighted-FontColor="#000000" Pressed-FontColor="#ffffff" Height="50px"
           Disabled-FontStyle="Italic" Disabled-FontColor="Gray80" Disabled-BackgroundColor="#7d7d7d" />
 
-  <CheckBox CheckBoxImage="Sprites/CheckBox.psd" Checked-CheckBoxImage="Sprites/CheckBoxPressed.psd" CheckBoxWidth="24" CheckBoxHeight="24" Height="25"
-        CheckBoxColor="#ffffff" Font="Fonts/Roboto-Regular.ttf" FontSize="18" FontStyle="Normal" FontColor="#ffffff" Spacing="10px"
+  <CheckBox CheckBoxImage="Sprites/CheckBox.psd" Focused-CheckBoxImage="Sprites/CheckBox.psd" Checked-CheckBoxImage="Sprites/CheckBoxPressed.psd" FocusedChecked-CheckBoxImage="Sprites/CheckBoxPressed.psd" CheckBoxWidth="24" CheckBoxHeight="24" Height="25"
+        CheckBoxColor="#ffffff" Focused-CheckBoxColor="#ef706a" Checked-CheckBoxColor="#ffffff" FocusedChecked-CheckBoxColor="#ef706a" Font="Fonts/Roboto-Regular.ttf" FontSize="18" FontStyle="Normal" FontColor="#ffffff" Spacing="10px"
         Disabled-FontStyle="Italic" Disabled-FontColor="Gray80" />
 
-  <RadioButton RadioButtonImage="Sprites/RadioButton.psd" Checked-RadioButtonImage="Sprites/RadioButtonPressed.psd" RadioButtonWidth="19" RadioButtonHeight="19" Height="25"        
-      RadioButtonColor="#ffffff" RadioButtonOffset="0,1,0,0" Font="Fonts/Roboto-Regular.ttf" FontSize="18" FontColor="#ffffff" FontStyle="Normal" Spacing="10px"
+  <RadioButton RadioButtonImage="Sprites/RadioButton.psd" Focused-RadioButtonImage="Sprites/RadioButton.psd" Checked-RadioButtonImage="Sprites/RadioButtonPressed.psd" FocusedChecked-RadioButtonImage="Sprites/RadioButtonPressed.psd" RadioButtonWidth="19" RadioButtonHeight="19" Height="25"
+      RadioButtonColor="#ffffff" Focused-RadioButtonColor="#ef706a" Checked-RadioButtonColor="#ffffff" FocusedChecked-RadioButtonColor="#ef706a" RadioButtonOffset="0,1,0,0" Font="Fonts/Roboto-Regular.ttf" FontSize="18" FontColor="#ffffff" FontStyle="Normal" Spacing="10px"
       Disabled-FontStyle="Italic" Disabled-FontColor="Gray80" />
 
   <Image Style="ShowcaseButtonContent" Sprite="Sprites/RainbowSquare.psd" Width="20" Height="20" Offset="10,0,0,0" Alignment="Left" />
@@ -26,11 +26,11 @@
   <Region Style="Window" BackgroundColor="Gray80" />
   <Region Style="DefaultBackgroundRegion" BackgroundColor="#131419" />
 
-  <HyperLink FontColor="#8cade3" Highlighted-FontColor="#c7dafb" Pressed-FontColor="#ef706a" Font="Fonts/Roboto-Light.ttf" FontSize="18" Width="200" Height="50" />
+  <HyperLink FontColor="#8cade3" Focused-FontColor="#ef706a" FocusedPressed-FontColor="#ef706a" Highlighted-FontColor="#c7dafb" Pressed-FontColor="#ef706a"  Font="Fonts/Roboto-Light.ttf" FontSize="18" Width="200" Height="50" />
 
-  <InputField Font="Fonts/Roboto-Light.ttf" BackgroundColor="White" FontSize="18" FontColor="#000000" Width="400px" Height="50px" TextMargin="10px,12px,10px,0px" SelectionColor="#ef706a" />
+  <InputField Font="Fonts/Roboto-Light.ttf" BackgroundColor="White" Focused-BackgroundColor="#c7dafb" FontSize="18" FontColor="#000000" Width="400px" Height="50px" TextMargin="10px,12px,10px,0px" SelectionColor="#ef706a" />
 
-  <Slider SliderFillColor="#ef706a" SliderHandleColor="#f8f6f3" SliderBackgroundColor="#626262" Breadth="12" SliderHandleLength="11" SliderHandleBreadth="22"/>
+  <Slider SliderFillColor="#ef706a" SliderHandleColor="#f8f6f3" Focused-SliderHandleColor="#ef706a" SliderBackgroundColor="#626262" Breadth="12" SliderHandleLength="11" SliderHandleBreadth="22"/>
 
   <Panel HorizontalScrollbarBreadth="10" VerticalScrollbarBreadth="10"
        HorizontalScrollbarColor="#000000" VerticalScrollbarColor="#000000"
@@ -60,7 +60,7 @@
   <ComboBox Height="52" Width="300" ButtonMargin="0,2,0,0" ButtonFont="Fonts/Roboto-Regular.ttf" ButtonFontSize="18" ButtonFontColor="#000000" 
             ButtonTextAlignment="Left" ButtonTextMargin="10,0,10,0"
             Pressed--ButtonFontColor="#000000" Highlighted--ButtonFontColor="#000000" ButtonImage="Sprites/ComboBoxButton.psd" ButtonImageType="Sliced" 
-            ButtonColor="#ffffff" Pressed--ButtonImage="Sprites/ComboBoxButtonPressed.psd" Highlighted--ButtonColor="#dddddd" Pressed--ButtonColor="#eeeeee"            
+            ButtonColor="#ffffff" Focused-ButtonColor="#ef706a" Pressed--ButtonImage="Sprites/ComboBoxButtonPressed.psd" Highlighted--ButtonColor="#dddddd" Pressed--ButtonColor="#eeeeee"            
             ListColor="#ffffff" ListMargin="2,0,0,0" ListContentMargin="0" />
   <ComboBoxItem Breadth="50px" Font="Fonts/Roboto-Regular.ttf" FontSize="18" FontColor="#000000" TextMargin="10,0,10,0" TextAlignment="Left"
                 BackgroundColor="White" Selected-BackgroundColor="#ef706a" Highlighted-BackgroundColor="Gray90" Pressed-BackgroundColor="#ef706a" />

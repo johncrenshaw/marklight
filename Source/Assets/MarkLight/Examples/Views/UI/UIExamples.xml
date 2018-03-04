@@ -26,6 +26,10 @@
               <TabHeader Style="SubMenu" />
               <SliderExample Style="Reset" />
             </Tab>
+            <Tab Text="Hyperlink">
+              <TabHeader Style="SubMenu" />
+              <HyperlinkExample Style="Reset" />
+            </Tab>
           </TabPanel>
         </Tab>
 

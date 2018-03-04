@@ -873,6 +873,8 @@ namespace MarkLight.Views.UI
         {
             var tabHeader = actionData.ItemView as TabHeader;
             SelectTab(tabHeader.ParentTab, true, false);
+
+            Focus();
         }
 
         /// <summary>
@@ -885,6 +887,80 @@ namespace MarkLight.Views.UI
             TabHeaderList.SetState(state);
 
             QueueChangeHandler("LayoutChanged");
+        }
+
+        public void UpdateState()
+        {
+            if (IsFocused)
+            {
+                TabHeaderList.SetState("Focused");
+            }
+            else
+            {
+                TabHeaderList.SetState(List.DefaultStateName);
+            }
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it focuses.
+        /// </summary>
+        public override void HandleFocus()
+        {
+            base.HandleFocus();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it blurs.
+        /// </summary>
+        public override void HandleBlur()
+        {
+            base.HandleBlur();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleAxisStart()
+        {
+            if (IsFocused)
+            {
+                // If the tab panel itself owns the focus, handle axis via the tab headerlist
+                return TabHeaderList.HandleAxisStart();
+            }
+            else
+            {
+                // Otherwise let axis propagate
+                return true;
+            }
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleKeyDown()
+        {
+            base.HandleKeyDown();
+
+            // Handle ctrl+tab and ctrl+shift+tab
+            if (Input.GetKeyDown(KeyCode.Tab) && (Input.GetKey(KeyCode.LeftControl) || Input.GetKey(KeyCode.RightControl) || Input.GetKey(KeyCode.LeftCommand) || Input.GetKey(KeyCode.RightCommand)))
+            {
+                if (Input.GetKey(KeyCode.LeftShift) || Input.GetKey(KeyCode.RightShift))
+                {
+                    PreviousTab();
+                }
+                else
+                {
+                    NextTab();
+                }
+                return false;
+            }
+
+            // Other keyboard events can propagate
+            return true;
         }
 
         #endregion

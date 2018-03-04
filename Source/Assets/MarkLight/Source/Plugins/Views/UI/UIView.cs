@@ -103,14 +103,14 @@ namespace MarkLight.Views.UI
         /// Alpha value.
         /// </summary>
         /// <d>Can be used to adjust the alpha color of this view and all its children. E.g. used for fade in/out animations. Is separate from and different from the background color of the view as it affects the children as well.</d>
-        [ChangeHandler("BackgroundChanged")]
+        [ChangeHandler("AlphaChanged")]
         public _float Alpha;
 
         /// <summary>
         /// Indicate if the view is visible.
         /// </summary>
         /// <d>Can be used to adjust the visiblity of the view. If set to false the view is made invisible but unlike when deactivating the view, invisible views are still is active and takes up space.</d>
-        [ChangeHandler("BackgroundChanged")]
+        [ChangeHandler("IsVisibleChanged")]
         public _bool IsVisible;
        
         /// <summary>
@@ -233,12 +233,37 @@ namespace MarkLight.Views.UI
         #endregion
 
         /// <summary>
+        /// Indicates if the view can be focused.
+        /// </summary>
+        /// <d>Boolean indicating if the view can have the input focus. While focused views recieve input events.</d>
+        [ChangeHandler("CanFocusChanged")]
+        public _bool IsFocusable;
+
+        /// <summary>
+        /// Triggered when the view gains input focus.
+        /// </summary>
+        /// <d>When the view receives the input focus, this action is triggered. If another view had the input focus it will trigger OnBlur.</d>
+        public ViewAction OnFocus;
+
+        /// <summary>
+        /// Triggered when the view loses input focus.
+        /// </summary>
+        /// <d>When the view loses input focus, this action is triggered.</d>
+        public ViewAction OnBlur;
+
+        /// <summary>
         /// Layout root.
         /// </summary>
         /// <d>A reference to the layout root of the UI views.</d>
         protected UserInterface _layoutRoot;
         
         protected CanvasGroup _canvasGroup;
+
+        // Internally set to flag focus as prevented, typically because the view is inactive or off screen
+        internal bool _preventFocus;
+
+        // Internally set to true when an ascendent prevents this view from gaining focus
+        internal bool _preventFocusByAscendent;
 
         #endregion
 
@@ -460,6 +485,108 @@ namespace MarkLight.Views.UI
         }
 
         /// <summary>
+        /// Called when the view changes alpha value.
+        /// </summary>
+        public void AlphaChanged()
+        {
+            BackgroundChanged();
+
+            if (_preventFocus != PreventsFocus)
+            {
+                PreventFocus(PreventsFocus);
+            }
+        }
+
+        /// <summary>
+        /// Called when the view changes visibility status.
+        /// </summary>
+        public void IsVisibleChanged()
+        {
+            BackgroundChanged();
+
+            if (_preventFocus != PreventsFocus)
+            {
+                PreventFocus(PreventsFocus);
+            }
+        }
+
+        /// <summary>
+        /// Called when IsActive field has been changed.
+        /// </summary>
+        public override void IsActiveChanged()
+        {
+            base.IsActiveChanged();
+
+            if (_preventFocus != PreventsFocus)
+            {
+                PreventFocus(PreventsFocus);
+            }
+        }
+
+        /// <summary>
+        /// Called when the view changes whether it is allowed to have focus.
+        /// </summary>
+        public void CanFocusChanged()
+        {
+            if (CanFocus)
+            {
+                LayoutRoot.AddFocusableView(this);
+            }
+            else
+            {
+                LayoutRoot.RemoveFocusableView(this);
+            }
+        }
+
+        /// <summary>
+        /// Called to prevent this element and all children from focusing
+        /// </summary>
+        public void SetFocusPreventedByAscendent(bool prevent)
+        {
+            _preventFocusByAscendent = prevent;
+            foreach (View child in this.GetChildren<View>(false))
+            {
+                UIView view = child as UIView;
+                if (view)
+                {
+                    if (_preventFocus != PreventsFocus)
+                    {
+                        view._preventFocusByAscendent = PreventsFocus;
+                        view.PreventFocus(PreventsFocus);
+                    }
+                    else if (view._preventFocusByAscendent != PreventsFocus)
+                    {
+                        view.SetFocusPreventedByAscendent(PreventsFocus);
+                    }
+                }
+            }
+
+            CanFocusChanged();
+        }
+
+        /// <summary>
+        /// Called to prevent this element and all children from focusing
+        /// </summary>
+        public void PreventFocus(bool prevent)
+        {
+            // Internally set to flag focus as prevented, typically because the view is inactive or off screen
+            _preventFocus = prevent;
+            foreach (View child in this.GetChildren<View>(false))
+            {
+                UIView view = child as UIView;
+                if (view)
+                {
+                    if (view._preventFocusByAscendent != PreventsFocus)
+                    {
+                        view.SetFocusPreventedByAscendent(_preventFocus || PreventsFocus);
+                    }
+                }
+            }
+
+            CanFocusChanged();
+        }
+
+        /// <summary>
         /// Gets local point in view from screen point (e.g. mouse position).
         /// </summary>
         public Vector2 GetLocalPoint(Vector2 screenPoint)
@@ -541,6 +668,92 @@ namespace MarkLight.Views.UI
                     spriteAsset.AddObserver(this);
                     BackgroundImage.DirectValue = new SpriteAsset(spriteAsset);
                 }
+            }
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Return true to propagate or false to stop propagation.
+        /// </summary>
+        public virtual bool HandleKeyDown()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Return true to propagate or false to stop propagation.
+        /// </summary>
+        public virtual bool HandleKey()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Return true to propagate or false to stop propagation.
+        /// </summary>
+        public virtual bool HandleAxisStart()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Return true to propagate or false to stop propagation.
+        /// </summary>
+        public virtual bool HandleAxis()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Return true to propagate or false to stop propagation.
+        /// </summary>
+        public virtual bool HandleSubmit()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Return true to propagate or false to stop propagation.
+        /// </summary>
+        public virtual bool HandleAction()
+        {
+            return true;
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it focuses.
+        /// </summary>
+        public virtual void HandleFocus()
+        {
+            OnFocus.Trigger();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it blurs.
+        /// </summary>
+        public virtual void HandleBlur()
+        {
+            OnBlur.Trigger();
+        }
+
+        /// <summary>
+        /// Returns true if the view has the input focus, false otherwise
+        /// </summary>
+        public void Focus()
+        {
+            if (!IsFocused)
+            {
+                LayoutRoot.Focus(this);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the view has the input focus, false otherwise
+        /// </summary>
+        public void Blur()
+        {
+            if (IsFocused)
+            {
+                LayoutRoot.Blur(this);
             }
         }
 
@@ -631,6 +844,41 @@ namespace MarkLight.Views.UI
                 _layoutRoot = value;
             }
         }
+
+        /// <summary>
+        /// Returns true if the view has the input focus, false otherwise
+        /// </summary>
+        public bool IsFocused
+        {
+            get
+            {
+                return LayoutRoot.IsFocused(this);
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the view has the input focus, false otherwise
+        /// </summary>
+        public bool PreventsFocus
+        {
+            get
+            {
+                var threshold = BackgroundImageEventAlphaThreshold.IsSet ? BackgroundImageEventAlphaThreshold.Value : 0;
+                return !IsVisible.Value || !IsActive.Value || (Alpha.Value <= threshold) || _preventFocusByAscendent;
+            }
+        }
+
+        /// <summary>
+        /// Returns true if the view has the input focus, false otherwise
+        /// </summary>
+        public bool CanFocus
+        {
+            get
+            {
+                return IsFocusable.Value && !PreventsFocus;
+            }
+        }
+
 
         #endregion
     }

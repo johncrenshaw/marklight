@@ -263,15 +263,24 @@ namespace MarkLight.Views.UI
             base.LayoutChanged();
         }
 
-        /// <summary>
-        /// Called when the field IsChecked is changed.
-        /// </summary>
-        public virtual void IsCheckedChanged()
+        public void UpdateState()
         {
             if (IsDisabled)
-                return;
-
-            if (IsChecked)
+            {
+                SetState("Disabled");
+            }
+            else if (IsFocused)
+            {
+                if (IsChecked)
+                {
+                    SetState("FocusedChecked");
+                }
+                else
+                {
+                    SetState("Focused");
+                }
+            }
+            else if (IsChecked)
             {
                 SetState("Checked");
             }
@@ -282,21 +291,30 @@ namespace MarkLight.Views.UI
         }
 
         /// <summary>
+        /// Called when the field IsChecked is changed.
+        /// </summary>
+        public virtual void IsCheckedChanged()
+        {
+            if (IsDisabled)
+                return;
+
+            UpdateState();
+        }
+
+        /// <summary>
         /// Called when IsDisabled field changes.
         /// </summary>
         public virtual void IsDisabledChanged()
         {
+            UpdateState();
+
             if (IsDisabled)
             {
-                SetState("Disabled");
-
                 // disable click actions
                 Click.IsDisabled = true;
             }
             else
             {
-                SetState(IsChecked ? "Checked" : DefaultStateName);
-
                 // enable button actions
                 Click.IsDisabled = false;
             }
@@ -307,6 +325,11 @@ namespace MarkLight.Views.UI
         /// </summary>
         public void RadioButtonClick()
         {
+            if (!IsFocused)
+            {
+                Focus();
+            }
+
             if (IsChecked)
                 return;
 
@@ -324,6 +347,39 @@ namespace MarkLight.Views.UI
 
             // select this radio button
             IsChecked.Value = true;
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it focuses.
+        /// </summary>
+        public override void HandleFocus()
+        {
+            base.HandleFocus();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it blurs.
+        /// </summary>
+        public override void HandleBlur()
+        {
+            base.HandleBlur();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Called on a view to trigger the action.
+        /// </summary>
+        public override bool HandleAction()
+        {
+            base.HandleAction();
+
+            // Trigger the click
+            Click.Trigger();
+
+            return false;
         }
 
         #endregion

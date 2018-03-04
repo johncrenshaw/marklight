@@ -1,0 +1,8 @@
+<HyperlinkExample xmlns="MarkLight">
+  <Group Spacing="25">
+    <Group Orientation="Horizontal" Spacing="25px" ContentAlignment="Top">
+      <HyperLink Text="Click Me" Click="HyperlinkClick" />
+    </Group>
+    <Label Text="Hyperlink clicked [b]{HyperlinkClickCount}[/b] times" FontSize="16" AdjustToText="Width" />
+  </Group>
+</HyperlinkExample>

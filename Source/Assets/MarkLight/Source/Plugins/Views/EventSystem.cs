@@ -1,5 +1,6 @@
 ﻿#region Using Statements
 using MarkLight.ValueConverters;
+using MarkLight.Views.UI;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -120,6 +121,51 @@ namespace MarkLight.Views
 #endif
 
         #endregion
+
+        /// <summary>
+        /// Layout root.
+        /// </summary>
+        /// <d>A reference to the layout root of the UI views.</d>
+        protected UserInterface _layoutRoot;
+
+        #endregion
+
+        #region Constructor
+
+        /// <summary>
+        /// Initializes a new instance of the class.
+        /// </summary>
+        public EventSystem()
+        {
+        }
+
+        #endregion
+
+        #region Properties
+
+        /// <summary>
+        /// Gets layout root canvas.
+        /// </summary>
+        public UserInterface LayoutRoot
+        {
+            get
+            {
+                if (_layoutRoot == null)
+                {
+                    _layoutRoot = this.Parent.Find<UserInterface>(false);
+                    if (_layoutRoot == null)
+                    {
+                        Debug.LogError(String.Format("[MarkLight] {0}: LayoutRoot missing. All UIViews needs to be placed under a UserInterface root canvas.", GameObjectName));
+                    }
+                }
+
+                return _layoutRoot;
+            }
+            set
+            {
+                _layoutRoot = value;
+            }
+        }
 
         #endregion
     }

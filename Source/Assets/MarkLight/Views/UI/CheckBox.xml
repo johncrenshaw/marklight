@@ -1,4 +1,4 @@
-<CheckBox Click="CheckBoxClick">
+<CheckBox Click="CheckBoxClick" IsFocusable="True">
   <Group Id="CheckBoxGroup" Orientation="Horizontal">
     <Image Id="CheckBoxImageView" />
     <Label Id="CheckBoxLabel" AdjustToText="Width" Height="100%" />

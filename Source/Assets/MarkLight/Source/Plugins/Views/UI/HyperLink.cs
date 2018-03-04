@@ -10,6 +10,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.EventSystems;
 using UnityEngine.UI;
+using System.Collections;
 #endregion
 
 namespace MarkLight.Views.UI
@@ -58,15 +59,49 @@ namespace MarkLight.Views.UI
             FontColor.Value = ColorValueConverter.ColorCodes["lightblue"]; 
         }
 
+        public void UpdateState()
+        {
+            if (IsDisabled)
+            {
+                SetState("Disabled");
+            }
+            else if (IsFocused)
+            {
+                if (IsPressed)
+                {
+                    SetState("FocusedPressed");
+                }
+                else
+                {
+                    SetState("Focused");
+                }
+            }
+            else if (IsMouseOver)
+            {
+                if (IsPressed)
+                {
+                    SetState("Pressed");
+                }
+                else
+                {
+                    SetState("Highlighted");
+                }
+            }
+            else
+            {
+                SetState(DefaultStateName);
+            }
+        }
+
         /// <summary>
         /// Called when IsDisabled field changes.
         /// </summary>
         public virtual void IsDisabledChanged()
         {
+            UpdateState();
+
             if (IsDisabled)
             {
-                SetState("Disbled");
-
                 // disable hyperlink actions
                 Click.IsDisabled = true;
                 MouseEnter.IsDisabled = true;
@@ -76,8 +111,6 @@ namespace MarkLight.Views.UI
             }
             else
             {
-                SetState(DefaultStateName);
-
                 // enable hyperlink actions
                 Click.IsDisabled = false;
                 MouseEnter.IsDisabled = false;
@@ -96,14 +129,7 @@ namespace MarkLight.Views.UI
                 return;
 
             IsMouseOver = true;
-            if (IsPressed)
-            {
-                SetState("Pressed");
-            }
-            else
-            {
-                SetState("Highlighted");
-            }
+            UpdateState();
         }
 
         /// <summary>
@@ -115,7 +141,7 @@ namespace MarkLight.Views.UI
                 return;
 
             IsMouseOver = false;
-            SetState(DefaultStateName);
+            UpdateState();
         }
 
         /// <summary>
@@ -126,8 +152,13 @@ namespace MarkLight.Views.UI
             if (State == "Disabled")
                 return;
 
+            if (!IsFocused)
+            {
+                Focus();
+            }
+
             IsPressed = true;
-            SetState("Pressed");
+            UpdateState();
         }
 
         /// <summary>
@@ -139,14 +170,52 @@ namespace MarkLight.Views.UI
                 return;
 
             IsPressed = false;
-            if (IsMouseOver)
-            {
-                SetState("Highlighted");
-            }
-            else
-            {
-                SetState(DefaultStateName);
-            }
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it focuses.
+        /// </summary>
+        public override void HandleFocus()
+        {
+            base.HandleFocus();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it blurs.
+        /// </summary>
+        public override void HandleBlur()
+        {
+            base.HandleBlur();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Called on a view to trigger the action.
+        /// </summary>
+        public override bool HandleAction()
+        {
+            base.HandleAction();
+
+            // Trigger the click
+            Click.Trigger();
+
+            // Visibly show as presed for a moment
+            IsPressed = true;
+            UpdateState();
+            StartCoroutine(ReleaseButtonShortly());
+
+            return false;
+        }
+
+        private IEnumerator ReleaseButtonShortly()
+        {
+            yield return new WaitForSeconds(0.3f);
+            IsPressed = false;
+            UpdateState();
         }
 
         #endregion

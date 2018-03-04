@@ -1,4 +1,4 @@
-<List>
+<List IsFocusable="True">
   <Mask Id="ListMask">
     <Panel Id="ListPanel">
       <Region Id="ScrollContent">

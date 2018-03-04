@@ -208,6 +208,18 @@ namespace MarkLight.Views.UI
         public _float Value;
 
         /// <summary>
+        /// Slide Change Step
+        /// </summary>
+        /// <d>Flat step added to the slider when starting axis input. Not affected by analog axis.</d>
+        public _float SlideStartStep;
+
+        /// <summary>
+        /// Rate of Change
+        /// </summary>
+        /// <d>How fast the slider adjusts when using an axis input instead of a mouse. If axis is analog rate is the max rate at full tilt.</d>
+        public _float SlideRatePerSecond;
+
+        /// <summary>
         /// Indicates if user can drag the slider handle.
         /// </summary>
         /// <d>Boolean indicating if the user can interact with the slider and drag the handle.</d>
@@ -259,6 +271,8 @@ namespace MarkLight.Views.UI
             Orientation.DirectValue = ElementOrientation.Horizontal;
             Min.DirectValue = 0;
             Max.DirectValue = 100;
+            SlideStartStep.DirectValue = 1;
+            SlideRatePerSecond.DirectValue = 25;
             CanSlide.DirectValue = true;
             SetValueOnDragEnded.DirectValue = false;
             SliderFillImageView.Alignment.DirectValue = ElementAlignment.Left;
@@ -313,6 +327,8 @@ namespace MarkLight.Views.UI
                 return;
             }
 
+            Focus();
+
             SetSlideTo(eventData.position);
         }
 
@@ -351,6 +367,8 @@ namespace MarkLight.Views.UI
             {
                 return;
             }
+
+            Focus();
 
             SetSlideTo(eventData.position, true);
         }
@@ -439,6 +457,83 @@ namespace MarkLight.Views.UI
             SliderFillImageView.Width.DirectValue = new ElementSize(fillP, ElementSizeUnit.Percents);
             SliderFillImageView.LayoutChanged();
         }
+
+        public void UpdateState()
+        {
+            if (IsFocused)
+            {
+                SetState("Focused");
+            }
+            else
+            {
+                SetState(DefaultStateName);
+            }
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it focuses.
+        /// </summary>
+        public override void HandleFocus()
+        {
+            base.HandleFocus();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it blurs.
+        /// </summary>
+        public override void HandleBlur()
+        {
+            base.HandleBlur();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleAxisStart()
+        {
+            base.HandleAxisStart();
+
+            if (Orientation.Value == ElementOrientation.Horizontal)
+            {
+                var delta = Input.GetAxisRaw("Horizontal") * SlideStartStep.Value;
+                SlideTo(Value.Value + delta);
+            }
+            else
+            {
+                var delta = Input.GetAxisRaw("Vertical") * SlideStartStep.Value;
+                SlideTo(Value.Value + delta);
+            }
+
+            // Axis events are not allowed to propagate
+            return false;
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleAxis()
+        {
+            base.HandleAxisStart();
+
+            if (Orientation.Value == ElementOrientation.Horizontal)
+            {
+                var delta = Input.GetAxis("Horizontal") * Time.deltaTime * SlideRatePerSecond.Value;
+                SlideTo(Value.Value + delta);
+            }
+            else
+            {
+                var delta = Input.GetAxis("Vertical") * Time.deltaTime * SlideRatePerSecond.Value;
+                SlideTo(Value.Value + delta);
+            }
+
+            // Axis events are not allowed to propagate
+            return false;
+        }
+
 
         #endregion
     }

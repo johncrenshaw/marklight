@@ -537,6 +537,8 @@ namespace MarkLight.Views.UI
         /// </summary>
         public void ComboBoxButtonClick(Button source)
         {
+            Focus();
+
             // toggle combo box list
             if (source.ToggleValue)
             {
@@ -545,6 +547,18 @@ namespace MarkLight.Views.UI
             else
             {
                 ComboBoxList.Deactivate();
+            }
+        }
+
+        public void UpdateState()
+        {
+            if (IsFocused)
+            {
+                SetState("Focused");
+            }
+            else
+            {
+                SetState(DefaultStateName);
             }
         }
 
@@ -557,6 +571,47 @@ namespace MarkLight.Views.UI
             ComboBoxButton.ToggleValue.Value = false;
             ComboBoxButton.Text.Value = actionData.ItemView != null? actionData.ItemView.Text.Value : String.Empty;
             ComboBoxList.Deactivate();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it focuses.
+        /// </summary>
+        public override void HandleFocus()
+        {
+            base.HandleFocus();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it blurs.
+        /// </summary>
+        public override void HandleBlur()
+        {
+            base.HandleBlur();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleAxisStart()
+        {
+            return ComboBoxList.HandleAxisStart();
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Called on a view to trigger the action.
+        /// </summary>
+        public override bool HandleAction()
+        {
+            base.HandleAction();
+
+            // Trigger the click
+            ComboBoxButton.Click.Trigger();
+
+            return false;
         }
 
         #endregion

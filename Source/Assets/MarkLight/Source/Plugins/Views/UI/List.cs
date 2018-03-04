@@ -621,8 +621,21 @@ namespace MarkLight.Views.UI
         /// Selected data list item.
         /// </summary>
         /// <d>Set when the selected list item changes and points to the user-defined data item.</d>
+        [ChangeHandler("SelectedItemViewChanged")]
+        public ListItem SelectedItemView;
+
+        /// <summary>
+        /// Selected data list item.
+        /// </summary>
+        /// <d>Set when the selected list item changes and points to the user-defined data item.</d>
         [ChangeHandler("SelectedItemChanged")]
         public _object SelectedItem;
+
+        /// <summary>
+        /// Selected items in the data list.
+        /// </summary>
+        /// <d>Contains selected items in the user-defined list data. Can contain more than one item if IsMultiSelect is true.</d>
+        public _GenericObservableList SelectedItemViews;
 
         /// <summary>
         /// Selected items in the data list.
@@ -654,6 +667,7 @@ namespace MarkLight.Views.UI
         private IObservableList _oldItems;
         private List<ListItem> _presentedListItems;
         private List<ListItem> _listItemTemplates;
+        private ListItem _selectedItemView;
         private object _selectedItem;
         private bool _updateWidth;
         private bool _updateHeight;
@@ -1177,6 +1191,19 @@ namespace MarkLight.Views.UI
         /// <summary>
         /// Called when the selected item of the list has been changed.
         /// </summary>
+        public virtual void SelectedItemViewChanged()
+        {
+            if (_selectedItemView == SelectedItemView)
+            {
+                return;
+            }
+
+            SelectItem(SelectedItemView);
+        }
+
+        /// <summary>
+        /// Called when the selected item of the list has been changed.
+        /// </summary>
         public virtual void SelectedItemChanged()
         {
             if (_selectedItem == SelectedItem.Value)
@@ -1194,6 +1221,11 @@ namespace MarkLight.Views.UI
         {
             if (listItem == null || (triggeredByClick && !CanSelect))
                 return;
+
+            if (triggeredByClick)
+            {
+                Focus();
+            }
 
             // is item already selected?
             if (listItem.IsSelected)
@@ -1256,6 +1288,38 @@ namespace MarkLight.Views.UI
         }
 
         /// <summary>
+        /// Selects the previous item in the list.
+        /// </summary>
+        public void SelectPrevItem()
+        {
+            ListItem item = SelectedItemView;
+            int index = item ? item.transform.GetSiblingIndex() : -1;
+            if (index > 0)
+            {
+                SelectItem(_presentedListItems[index - 1] as ListItem, false);
+                return;
+            }
+            else
+            {
+                SelectItem(_presentedListItems[0] as ListItem, false);
+            }
+        }
+
+        /// <summary>
+        /// Selects the next item in the list.
+        /// </summary>
+        public void SelectNextItem()
+        {
+            ListItem item = SelectedItemView;
+            int index = item ? item.transform.GetSiblingIndex() : -1;
+            if (index + 1 < _presentedListItems.Count)
+            {
+                SelectItem(_presentedListItems[index + 1] as ListItem, false);
+                return;
+            }
+        }
+
+        /// <summary>
         /// Selects item in the list.
         /// </summary>
         public void SelectItem(object itemData)
@@ -1287,12 +1351,20 @@ namespace MarkLight.Views.UI
             if (selected)
             {
                 // item selected
+                _selectedItemView = listItem;
                 _selectedItem = listItem.Item.Value;
+                SelectedItemView = listItem;
                 SelectedItem.Value = _selectedItem;
                 IsItemSelected.Value = true;
                 if (Items.Value != null)
                 {
                     Items.Value.SetSelected(_selectedItem);
+                }
+
+                // add to list of selected items
+                if (!SelectedItemViews.Value.Contains(listItem))
+                {
+                    SelectedItemViews.Value.Add(listItem);
                 }
 
                 // add to list of selected items
@@ -1310,7 +1382,15 @@ namespace MarkLight.Views.UI
             else
             {
                 // remove from list of selected items
+                SelectedItemViews.Value.Remove(listItem);
                 SelectedItems.Value.Remove(listItem.Item.Value);
+
+                // set selected item
+                if (SelectedItemView == listItem)
+                {
+                    _selectedItemView = SelectedItemViews.Value.LastOrDefault() as ListItem;
+                    SelectedItemView = listItem;
+                }
 
                 // set selected item
                 if (SelectedItem.Value == listItem.Item.Value)
@@ -1323,7 +1403,7 @@ namespace MarkLight.Views.UI
                         Items.Value.SetSelected(_selectedItem);
                     }
                 }
-                IsItemSelected.Value = SelectedItems.Value.Count > 0;
+                IsItemSelected.Value = SelectedItemViews.Value.Count > 0;
 
                 // trigger item deselected action
                 if (ItemDeselected.HasEntries)
@@ -1827,6 +1907,7 @@ namespace MarkLight.Views.UI
 
             _updateWidth = Width.Value.Unit == ElementSizeUnit.Percents;
             _updateHeight = Height.Value.Unit == ElementSizeUnit.Percents;
+            SelectedItemViews.DirectValue = new GenericObservableList();
             SelectedItems.DirectValue = new GenericObservableList();
 
             // remove panel if not used
@@ -1922,6 +2003,75 @@ namespace MarkLight.Views.UI
             _presentedListItems.Clear();
             _presentedListItems.AddRange(GetActiveListItems());
             UpdateSortIndex();
+        }
+
+        public void UpdateState()
+        {
+            if (IsFocused)
+            {
+                SetState("Focused");
+            }
+            else
+            {
+                SetState(DefaultStateName);
+            }
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it focuses.
+        /// </summary>
+        public override void HandleFocus()
+        {
+            base.HandleFocus();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it blurs.
+        /// </summary>
+        public override void HandleBlur()
+        {
+            base.HandleBlur();
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleAxisStart()
+        {
+            base.HandleAxisStart();
+
+            if (Orientation.Value == ElementOrientation.Horizontal)
+            {
+                if (Input.GetAxisRaw("Horizontal") < 0)
+                {
+                    SelectPrevItem();
+                    return false;
+                }
+                if (Input.GetAxisRaw("Horizontal") > 0)
+                {
+                    SelectNextItem();
+                    return false;
+                }
+            }
+            else
+            {
+                if (Input.GetAxisRaw("Vertical") > 0)
+                {
+                    SelectPrevItem();
+                    return false;
+                }
+                if (Input.GetAxisRaw("Vertical") < 0)
+                {
+                    SelectNextItem();
+                    return false;
+                }
+            }
+
+            return true; // allow the event to keep propagating
         }
 
         #endregion

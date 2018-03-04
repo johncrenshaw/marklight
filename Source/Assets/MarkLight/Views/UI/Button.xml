@@ -1,6 +1,6 @@
 <Button Click="ButtonMouseClick" MouseEnter="ButtonMouseEnter"
         MouseExit="ButtonMouseExit" MouseDown="ButtonMouseDown" MouseUp="ButtonMouseUp"
-        CanToggleOn="True" CanToggleOff="True" Width="160" Height="40" TextPadding="20,10,20,10">
+        CanToggleOn="True" CanToggleOff="True" IsFocusable="True" Width="160" Height="40" TextPadding="20,10,20,10">
   <Label Id="ButtonLabel" Width="100%" Height="100%" TextAlignment="Center" />
 
   <StateAnimation From="Any" To="Highlighted">

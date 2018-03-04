@@ -351,6 +351,14 @@ namespace MarkLight.Views.UI
             TextChanged();
         }
 
+        void Update()
+        {
+            // If the input field is focused and this view doesn't have focus take the focus
+            if (InputFieldComponent.isFocused == true && !IsFocused)
+            {
+                Focus();
+            }
+        }
         /// <summary>
         /// Called when the text is changed.
         /// </summary>
@@ -419,6 +427,108 @@ namespace MarkLight.Views.UI
             {
                 InputFieldPlaceholder.IsActive.Value = false;
             }
+        }
+
+        public void UpdateState()
+        {
+            if (IsFocused)
+            {
+                SetState("Focused");
+            }
+            else
+            {
+                SetState(DefaultStateName);
+            }
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it focuses.
+        /// </summary>
+        public override void HandleFocus()
+        {
+            base.HandleFocus();
+
+            // If the input field is not focused, focus it
+            if (!InputFieldComponent.isFocused == true)
+            {
+                InputFieldComponent.ActivateInputField();
+            }
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Non-Propagating input event handler. Called on a view when it blurs.
+        /// </summary>
+        public override void HandleBlur()
+        {
+            base.HandleBlur();
+
+            // If the input field is focused, blur it
+            if (InputFieldComponent.isFocused == true)
+            {
+                InputFieldComponent.DeactivateInputField();
+            }
+
+            UpdateState();
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleKeyDown()
+        {
+            if (LineType.Value != UnityEngine.UI.InputField.LineType.MultiLineNewline)
+            {
+                // Whitelist keys that are allowed to pass through
+                if (Input.GetKeyDown(KeyCode.Tab) ||
+                    Input.GetKeyDown(KeyCode.Return) ||
+                    Input.GetKeyDown(KeyCode.KeypadEnter))
+                {
+                    return true;
+                }
+            }
+
+            // Used by input, eat the key
+            return false;
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleKey()
+        {
+            if (LineType.Value != UnityEngine.UI.InputField.LineType.MultiLineNewline)
+            {
+                // Whitelist keys that are allowed to pass through
+                if (Input.GetKey(KeyCode.Tab) ||
+                    Input.GetKey(KeyCode.Return) ||
+                    Input.GetKey(KeyCode.KeypadEnter))
+                {
+                    return true;
+                }
+            }
+
+            // Used by input, eat the key
+            return false;
+        }
+
+        /// <summary>
+        /// Propagating input event handler.
+        /// </summary>
+        public override bool HandleAxisStart()
+        {
+            // Used by input, eat the axis
+            return false;
+        }
+
+        /// <summary>
+        /// Propagating input event handler. Called on a view to trigger the action.
+        /// </summary>
+        public override bool HandleAction()
+        {
+            // Used by input, eat the action
+            return false;
         }
 
         #endregion
